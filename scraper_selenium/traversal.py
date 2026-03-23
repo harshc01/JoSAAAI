@@ -44,7 +44,7 @@ class SeleniumTraversal:
                 inst = Select(driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ddlInstitute"))
             
                 for k in range(1, len(inst.options)):
-                   inst.select_by_index(k)
+                    inst.select_by_index(k)
                 
                     wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_ddlBranch")))
                     
