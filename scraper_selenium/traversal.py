@@ -74,7 +74,7 @@ class SeleniumTraversal:
                                 records = parse_table(soup)
 
                                 results.extend(records)
-                                print(f"Collected: {len(records)}")
+                                print(f"Collected: {len(records)} rows")
 
-save_to_csv(results, "data/output.csv")
-self.browser.close()
+        save_to_csv(results, "data/output.csv")
+        self.browser.close()
