@@ -11,9 +11,12 @@ URL = "https://josaa.admissions.nic.in/Applicant/seatallotmentresult/currentorcr
 OUTPUT_PATH = "data/output.csv"
 
 
-def _extract(page: Page) -> list[dict]:
+def _extract(page: Page, round_label: str) -> list[dict]:
     soup = BeautifulSoup(page.content(), "lxml")
-    return parse_table(soup)
+    records = parse_table(soup)
+    for r in records:
+        r["round"] = round_label
+    return records
 
 
 class PlaywrightTraversal:
@@ -43,8 +46,9 @@ class PlaywrightTraversal:
 
             try:
                 for i in range(1, round_count):
-                    log.info("Processing round %d...", i)
                     try:
+                        round_label = page.locator("select").nth(0).locator("option").nth(i).inner_text()
+                        log.info("Processing round: %s", round_label)
                         page.locator("select").nth(0).select_option(index=i, force=True)
                         page.wait_for_timeout(2000)
                         page.locator("select").nth(1).select_option(index=1, force=True)
@@ -60,8 +64,8 @@ class PlaywrightTraversal:
                         page.wait_for_load_state("networkidle")
                         page.wait_for_timeout(3000)
 
-                        records = _extract(page)
-                        log.info("Round %d: +%d rows.", i, len(records))
+                        records = _extract(page, round_label)
+                        log.info("Round %s: +%d rows.", round_label, len(records))
                         results.extend(records)
 
                     except Exception as exc:
