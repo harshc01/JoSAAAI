@@ -24,7 +24,12 @@ class PlaywrightTraversal:
         with sync_playwright() as pw:
             browser = pw.chromium.launch(
                 headless=True,
-                args=["--no-sandbox", "--disable-dev-shm-usage"],
+                args=[
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--single-process",
+                ],
             )
             page = browser.new_page()
 
@@ -39,28 +44,33 @@ class PlaywrightTraversal:
             try:
                 for i in range(1, round_count):
                     log.info("Processing round %d...", i)
+                    try:
+                        page.locator("select").nth(0).select_option(index=i, force=True)
+                        page.wait_for_timeout(2000)
+                        page.locator("select").nth(1).select_option(index=1, force=True)
+                        page.wait_for_timeout(2000)
+                        page.locator("select").nth(2).select_option(index=1, force=True)
+                        page.wait_for_timeout(2000)
+                        page.locator("select").nth(3).select_option(index=1, force=True)
+                        page.wait_for_timeout(2000)
+                        page.locator("select").nth(4).select_option(index=1, force=True)
+                        page.wait_for_timeout(2000)
 
-                    page.locator("select").nth(0).select_option(index=i, force=True)
-                    page.wait_for_timeout(2000)
-                    page.locator("select").nth(1).select_option(index=1, force=True)
-                    page.wait_for_timeout(2000)
-                    page.locator("select").nth(2).select_option(index=1, force=True)
-                    page.wait_for_timeout(2000)
-                    page.locator("select").nth(3).select_option(index=1, force=True)
-                    page.wait_for_timeout(2000)
-                    page.locator("select").nth(4).select_option(index=1, force=True)
-                    page.wait_for_timeout(2000)
+                        page.get_by_role("button", name="Submit").click(force=True)
+                        page.wait_for_load_state("networkidle")
+                        page.wait_for_timeout(3000)
 
-                    page.get_by_role("button", name="Submit").click(force=True)
-                    page.wait_for_load_state("networkidle")
-                    page.wait_for_timeout(3000)
+                        records = _extract(page)
+                        log.info("Round %d: +%d rows.", i, len(records))
+                        results.extend(records)
 
-                    records = _extract(page)
-                    log.info("Round %d: +%d rows.", i, len(records))
-                    results.extend(records)
+                    except Exception as exc:
+                        log.error("Round %d failed: %s — reloading page.", i, exc)
+                        page.goto(URL, timeout=60_000)
+                        page.wait_for_load_state("networkidle")
+                        page.wait_for_timeout(3000)
+                        continue
 
-            except Exception as exc:
-                log.error("Interrupted: %s", exc)
             finally:
                 if results:
                     saved = save_to_csv(results, OUTPUT_PATH)
