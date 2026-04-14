@@ -4,8 +4,6 @@ from pydantic import BaseModel
 from api.agent import run_agent
 from api.routes import router
 
-app.include_router(router, prefix="/api")
-
 app = FastAPI()
 
 app.add_middleware(
@@ -15,20 +13,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(router, prefix="/api")
 
 class ChatRequest(BaseModel):
     message: str
 
-
 class ChatResponse(BaseModel):
     response: str
-
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     result = await run_agent(req.message)
     return ChatResponse(response=result)
-
 
 @app.get("/health")
 def health():

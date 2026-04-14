@@ -4,9 +4,9 @@ pandas
 lxml
 playwright
 fastapi
-uvicorn
+uvicorn[standard]
 supabase
+httpx
 groq
 python-dotenv
 pydantic
-google-genai
