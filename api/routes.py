@@ -5,7 +5,7 @@ router = APIRouter()
 
 
 @router.get("/predict")
-def predict(
+async def predict(
     rank: int,
     category: str = "OPEN",
     gender: str = "Gender-Neutral",
@@ -37,7 +37,7 @@ def predict(
 
 
 @router.get("/explore")
-def explore(
+async def explore(
     institute: str = None,
     program: str = None,
     category: str = None,
@@ -65,7 +65,7 @@ def explore(
 
 
 @router.get("/trends")
-def trends(institute: str = None, program: str = None, category: str = "OPEN"):
+async def trends(institute: str = None, program: str = None, category: str = "OPEN"):
     query = (
         supabase.table("seat_allotments")
         .select("round,opening_rank,closing_rank,institute,program")
@@ -81,7 +81,7 @@ def trends(institute: str = None, program: str = None, category: str = "OPEN"):
 
 
 @router.get("/compare")
-def compare(institutes: str = Query(...), program: str = None, category: str = "OPEN"):
+async def compare(institutes: str = Query(...), program: str = None, category: str = "OPEN"):
     names = [i.strip() for i in institutes.split(",")]
     all_data = []
     for name in names:
@@ -99,14 +99,14 @@ def compare(institutes: str = Query(...), program: str = None, category: str = "
 
 
 @router.get("/institutes")
-def institutes():
+async def institutes():
     result = supabase.table("seat_allotments").select("institute").execute()
     names = sorted(set(r["institute"] for r in result.data))
     return {"data": names}
 
 
 @router.get("/programs")
-def programs():
+async def programs():
     result = supabase.table("seat_allotments").select("program").execute()
     names = sorted(set(r["program"] for r in result.data))
     return {"data": names}
