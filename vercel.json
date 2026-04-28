@@ -3,12 +3,20 @@
     {
       "src": "api/main.py",
       "use": "@vercel/python"
-    }
-  ],
-  "routes": [
+    },
     {
-      "src": "/(.*)",
-      "dest": "api/main.py"
+      "src": "frontend/package.json",
+      "use": "@vercel/next"
+    }    
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/main.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
     }
   ]
 }
